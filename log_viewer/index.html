@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Данные</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f8fafc; color: #222; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      background: #fff;
+      border: 1px solid #b0b0b0;
+      border-radius: 6px 6px 0 0;
+      padding: 10px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn:disabled, .tab-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-bottom: 2px solid #2563eb;
+      cursor: default;
+    }
+    .tab-content {
+      background: #fff;
+      border: 1px solid #b0b0b0;
+      border-radius: 0 8px 8px 8px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 24px 18px 18px 18px;
+      margin-bottom: 30px;
+      min-height: 220px;
+    }
+    h2 { margin-top: 0; }
+    .hint {
+      background: #e0e7ff;
+      color: #3730a3;
+      border-left: 4px solid #6366f1;
+      padding: 8px 14px;
+      margin-bottom: 18px;
+      border-radius: 4px;
+      font-size: 15px;
+    }
+    button { margin-right: 10px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #b0b0b0; background: #f1f5f9; padding: 7px 16px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+    button:active { background: #dbeafe; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+    th { background-color: #f1f5f9; font-weight: 600; }
+    tr:nth-child(even) { background: #f9fafb; }
+    @media (max-width: 700px) {
+      .tab-content { padding: 10px 2px; }
+      th, td { font-size: 13px; }
+      button { font-size: 13px; padding: 5px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button id="tabClassic" class="tab-btn" onclick="showTab('classic')">Поддельная соцсеть</button>
+    <button id="tabKeylogger" class="tab-btn" onclick="showTab('keylogger')">Приложение-кейлоггер</button>
+    <button id="tabVpn" class="tab-btn" onclick="showTab('vpn')">Мониторинг трафика</button>
+    <button id="tabFakeBank" class="tab-btn" onclick="showTab('fakebank')">Банковские данные</button>
+  </div>
+  <button id="hintBtn" onclick="toggleHint()" style="margin-bottom:10px;">Показать подсказку</button>
+  <div id="hintClassic" class="hint" style="display:none;">Отображаются данные телефон/email, пароль и время создания записи. Поле ID является счетчиком. Для сортировки ID нажмите кнопку "Сортировать ID". Для обновления списка нажмите на кнопку "Обновить". Кнопка "Очистить" отвечает за очистку полей до перезагрузки приложения. Кнопка "Очистить сервер" удаляет данные из БД.</div>
+  <div id="hintKeylogger" class="hint" style="display:none;">Отображаются данные о событии: "Tap" - нажатие на экран, "Ввод символа" - показывает какой символ введен на клавиатуре, "Добавлен пароль" - показывает, какой пароль был добавлен, "Пароль сохранен" - показывает название пароля, логин, пароль и заметку. В поле "Детали" находятся данные. "ID устройства" - показывает ID устройства. "Время создания" - показывает, когда была создана запись. Поле ID является счетчиком. Для сортировки ID нажмите кнопку "Сортировать ID". Для обновления списка нажмите на кнопку "Обновить". Кнопка "Очистить" отвечает за очистку полей до перезагрузки приложения. Кнопка "Очистить сервер" удаляет данные из БД.</div>
+  <div id="hintVpn" class="hint" style="display:none;">Здесь отображаются сетевые события, эмулируемые fake_vpn. "Устройсвто" - модель устройства, "src_ip" - показывает, откуда была совершена отправка, "dst_ip" - адресс, по которому отправили, "Протокол" - протокол запроса, "Payload" - http-запрос. Поле ID является счетчиком. Для сортировки ID нажмите кнопку "Сортировать ID". Для обновления списка нажмите на кнопку "Обновить". Кнопка "Очистить" отвечает за очистку полей до перезагрузки приложения. Кнопка "Очистить сервер" удаляет данные из БД..</div>
+  <div id="hintFakeBank" class="hint" style="display:none;">Здесь отображаются логи, отправленные приложением Fake Bank: персональные данные, данные карты и коды подтверждения. "Тип" - тип данных, "Данные" - полученные данные. Поле ID является счетчиком. Для сортировки ID нажмите кнопку "Сортировать ID". Для обновления списка нажмите на кнопку "Обновить". Кнопка "Очистить" отвечает за очистку полей до перезагрузки приложения. Кнопка "Очистить сервер" удаляет данные из БД.</div>
+  <div id="classicTab" class="tab-content">
+    <h2>Поддельная соцсеть</h2>
+    <div>
+      <button onclick="loadLogs()">Обновить</button>
+      <button onclick="clearView()">Очистить</button>
+      <button onclick="sortLogs()">Сортировать по ID</button>
+      <button id="clearServerBtn">Очистить базу данных</button>
+    </div>
+    <table id="logTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email/Login</th>
+          <th>Пароль</th>
+          <th>Время создания</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="keyloggerTab" class="tab-content" style="display:none">
+    <h2>Приложение-кейлоггер</h2>
+    <button onclick="loadKeyloggerLogs()">Обновить</button>
+    <button onclick="clearKeyloggerView()">Очистить</button>
+    <button onclick="sortKeyloggerLogs()">Сортировать по ID</button>
+    <button id="clearKeyloggerServerBtn">Очистить базу данных</button>
+    <table id="keyloggerLogTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Тип события</th>
+          <th>Детали</th>
+          <th>ID устройства</th>
+          <th>Время создания</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="vpnTab" class="tab-content" style="display:none">
+    <h2>Мониторинг трафика</h2>
+    <button onclick="loadVpnLogs()">Обновить</button>
+    <button onclick="clearVpnView()">Очистить</button>
+    <button onclick="sortVpnLogs()">Сортировать по ID</button>
+    <button onclick="clearVpnServer()">Очистить базу данных</button>
+    <table id="vpnLogTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Устройство</th>
+          <th>src_ip</th>
+          <th>dst_ip</th>
+          <th>Протокол</th>
+          <th>Payload</th>
+          <th>Время создания</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="fakeBankTab" class="tab-content" style="display:none">
+    <h2>Банковские данные</h2>
+    <button onclick="loadFakeBankLogs()">Обновить</button>
+    <button onclick="clearFakeBankView()">Очистить</button>
+    <button onclick="sortFakeBankLogs()">Сортировать по ID</button>
+    <button id="clearFakeBankServerBtn">Очистить базу данных</button>
+    <table id="fakeBankLogTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Тип</th>
+          <th>Данные</th>
+          <th>Время создания</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script src="renderer.js"></script>
+  <script>
+    function toggleHint() {
+      const tab = document.getElementById('classicTab').style.display === '' ? 'classic'
+        : document.getElementById('keyloggerTab').style.display === '' ? 'keylogger'
+        : document.getElementById('vpnTab').style.display === '' ? 'vpn'
+        : 'fakebank';
+      document.getElementById('hintClassic').style.display = tab === 'classic' ? (document.getElementById('hintClassic').style.display === 'none' ? '' : 'none') : 'none';
+      document.getElementById('hintKeylogger').style.display = tab === 'keylogger' ? (document.getElementById('hintKeylogger').style.display === 'none' ? '' : 'none') : 'none';
+      document.getElementById('hintVpn').style.display = tab === 'vpn' ? (document.getElementById('hintVpn').style.display === 'none' ? '' : 'none') : 'none';
+      document.getElementById('hintFakeBank').style.display = tab === 'fakebank' ? (document.getElementById('hintFakeBank').style.display === 'none' ? '' : 'none') : 'none';
+    }
+    // Автоматически скрывать подсказку при переключении вкладок
+    function showTab(tab) {
+      document.getElementById('classicTab').style.display = tab === 'classic' ? '' : 'none';
+      document.getElementById('keyloggerTab').style.display = tab === 'keylogger' ? '' : 'none';
+      document.getElementById('vpnTab').style.display = tab === 'vpn' ? '' : 'none';
+      document.getElementById('fakeBankTab').style.display = tab === 'fakebank' ? '' : 'none';
+      document.getElementById('tabClassic').disabled = tab === 'classic';
+      document.getElementById('tabKeylogger').disabled = tab === 'keylogger';
+      document.getElementById('tabVpn').disabled = tab === 'vpn';
+      document.getElementById('tabFakeBank').disabled = tab === 'fakebank';
+      document.getElementById('hintClassic').style.display = 'none';
+      document.getElementById('hintKeylogger').style.display = 'none';
+      document.getElementById('hintVpn').style.display = 'none';
+      document.getElementById('hintFakeBank').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
